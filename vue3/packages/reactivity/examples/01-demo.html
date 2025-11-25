@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script type="module">
+      import {ref,effect} from '../dist/reactivity.esm.js'
+    //   import {
+    //     ref,
+    //     effect,
+    //   } from '../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+      console.log('ref', ref, effect)
+      const count = ref(0)
+
+      // 案例1：
+     /* effect(() => {
+        console.log('count.value1', count.value)
+      })
+       effect(() => {
+        console.log('count.value2', count.value)
+      })*/
+
+      // 案例2：
+     /* const effect1 = effect(() => {
+        // activeSub = effect1
+        // effect2执行之前，如果 preSub = activeSub
+       const effect2 = effect(() => {
+        // activeSub = effect2
+          console.log('count.value2 内部', count.value)
+        })
+        // 执行完了，就不设置成undefined activeSub = preSub
+        console.log('count.value1 外部', count.value)
+      })*/
+
+      // 案例3：
+      const e1 = effect(()=>{
+        console.log('count.value', count.value)
+      }, {
+        scheduler(){
+          console.log('触发了调度器')
+        }
+      })
+      console.dir(e1)
+       
+
+      setTimeout(() => {
+        count.value = 1
+      }, 1000)
+    </script>
+  </body>
+</html>

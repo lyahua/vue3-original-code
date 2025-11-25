@@ -1,0 +1,21 @@
+{
+  "name": "@vue/vue",
+  "version": "1.0.0",
+  "description": "Vue核心包",
+  "main": "dist/vue.esm.js",
+  "module": "dist/vue.esm.js",
+  "files": [
+    "index.js",
+    "dist"
+  ],
+  "sideEffects": false,
+  "buildOptions": {
+    "name": "Vue",
+    "formats": [
+      "esm-bundler",
+      "esm-browser",
+      "cjs",
+      "global"
+    ]
+  }
+}
