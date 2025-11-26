@@ -9,9 +9,18 @@ var ReactiveEffect = class {
   constructor(fn2) {
     this.fn = fn2;
   }
+  /**
+   * 依赖项链表的头节点
+   */
+  deps;
+  /**
+   * 依赖项链表的尾节点
+   */
+  depsTail;
   run() {
     const preSub = activeSub;
     activeSub = this;
+    this.depsTail = void 0;
     try {
       return this.fn();
     } finally {
@@ -35,19 +44,34 @@ function effect(fn2, options) {
 }
 
 // packages/reactivity/src/system.ts
-function link(deep, sub) {
+function link(dep, sub) {
+  const currentDep = sub.depsTail;
+  const nextDep = currentDep === void 0 ? sub.deps : currentDep.nextDep;
+  if (nextDep && nextDep.dep === dep) {
+    console.log("\u76F8\u540C\u7684\u4F9D\u8D56\uFF0C\u76F4\u63A5\u590D\u7528");
+    sub.depsTail = nextDep;
+    return;
+  }
   const newLink = {
     sub,
+    dep,
     nextSub: void 0,
     preSub: void 0
   };
-  if (deep.subsTail) {
-    deep.subsTail.nextSub = newLink;
-    newLink.preSub = deep.subsTail;
-    deep.subsTail = newLink;
+  if (dep.subsTail) {
+    dep.subsTail.nextSub = newLink;
+    newLink.preSub = dep.subsTail;
+    dep.subsTail = newLink;
   } else {
-    deep.subs = newLink;
-    deep.subsTail = newLink;
+    dep.subs = newLink;
+    dep.subsTail = newLink;
+  }
+  if (sub.depsTail) {
+    sub.depsTail.nextDep = newLink;
+    sub.depsTail = newLink;
+  } else {
+    sub.deps = newLink;
+    sub.depsTail = newLink;
   }
 }
 function progagate(subs) {
