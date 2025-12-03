@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+
+<body style="margin: 0; padding: 0">
+    <button id="btn">一键复制</button>
+    <table border="1" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td>
+                <table align="center" border="1" cellpadding="0" cellspacing="0" width="600"
+                    style="border-collapse: collapse">
+                    <tr>
+                        <td style="background: red; font-weight: 900;">Row 1</td>
+                    </tr>
+
+                    <tr>
+                        <td style="background: green;">Row 2</td>
+                    </tr>
+
+                    <tr>
+                        <td style="background: orange;">Row 3</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+
+    </table>
+
+    <script>
+        btn.onclick = async (e) => {
+            console.log('e', e.clipboardData)
+            // console.log('aaa', document.querySelector('table').innerHTML)
+            try {
+                const htmlContent = document.querySelector('table').innerHTML
+                // 创建包含 HTML 的 Blob 对象
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                // 构造 ClipboardItem
+                const clipboardItem = new ClipboardItem({ 'text/html': blob });
+                // 写入剪贴板
+                await navigator.clipboard.write([clipboardItem]);
+                alert('HTML 内容复制成功！');
+            } catch (err) {
+                console.error('复制失败:', err);
+                // 降级处理：复制纯文本
+                await navigator.clipboard.writeText(htmlContent);
+                alert('已复制纯文本内容（样式可能丢失）');
+            }
+        }
+    </script>
+</body>
+
+</html>
