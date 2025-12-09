@@ -23,7 +23,8 @@
                     </tr>
 
                     <tr>
-                        <td style="background: orange;">Row 3</td>
+                        <td style="background: orange;"><img src="https://www.bing.com/th?id=OADD2.1180875511303624_17YVATJVWSMDAY7&pid=21.2&c=16&roil=0&roit=0&roir=1&roib=1&w=472&h=247&rs=2&qlt=100" /></td>
+                        
                     </tr>
                 </table>
             </td>
@@ -33,17 +34,64 @@
     </table>
 
     <script>
+
+        // Blob 转 Base64
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+        async function convertImagesToInline(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const images = doc.querySelectorAll('img');
+
+            for (const img of images) {
+                const src = img.src;
+                if (src.startsWith('http')) {
+                    // 将图片转为 Base64
+                    const response = await fetch(src);
+                    const blob = await response.blob();
+                    const base64 = await blobToBase64(blob);
+                    img.src = `data:${blob.type};base64,${base64}`;
+                }
+            }
+
+            return doc.body.innerHTML;
+        }
+
+        async function copyHtmlToClipboard(html) {
+            try {
+                // 现代浏览器：使用 Clipboard API
+                const blob = new Blob([html], { type: 'text/html' });
+                const clipboardItem = new ClipboardItem({ 'text/html': blob });
+                await navigator.clipboard.write([clipboardItem]);
+                console.log('HTML 内容（含图片）复制成功！');
+            } catch (err) {
+                console.error('剪贴板写入失败，尝试回退方案:', err);
+                // 旧浏览器回退：使用 execCommand
+                // fallbackCopyHtml(html);
+            }
+        }
+
         btn.onclick = async (e) => {
             console.log('e', e.clipboardData)
             // console.log('aaa', document.querySelector('table').innerHTML)
             try {
-                const htmlContent = document.querySelector('table').innerHTML
-                // 创建包含 HTML 的 Blob 对象
-                const blob = new Blob([htmlContent], { type: 'text/html' });
-                // 构造 ClipboardItem
-                const clipboardItem = new ClipboardItem({ 'text/html': blob });
-                // 写入剪贴板
-                await navigator.clipboard.write([clipboardItem]);
+                // const htmlContent = document.querySelector('table').innerHTML
+                // // 创建包含 HTML 的 Blob 对象
+                // const blob = new Blob([htmlContent], { type: 'text/html' });
+                // // 构造 ClipboardItem
+                // const clipboardItem = new ClipboardItem({ 'text/html': blob });
+                // // 写入剪贴板
+                // await navigator.clipboard.write([clipboardItem]);
+
+                const html = document.querySelector('table').innerHTML
+                const processedHtml = await convertImagesToInline(html);
+                await copyHtmlToClipboard(processedHtml);
                 alert('HTML 内容复制成功！');
             } catch (err) {
                 console.error('复制失败:', err);
